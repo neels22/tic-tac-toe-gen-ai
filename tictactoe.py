@@ -70,6 +70,35 @@ print(board)
 
 
 
+winning_states_X = [
+    # Horizontal Wins
+    [(0, 0), (0, 1), (0, 2)],  
+    [(1, 0), (1, 1), (1, 2)],  
+    [(2, 0), (2, 1), (2, 2)],  
+    # Vertical Wins
+    [(0, 0), (1, 0), (2, 0)],  
+    [(0, 1), (1, 1), (2, 1)],  
+    [(0, 2), (1, 2), (2, 2)],  
+    # Diagonal Wins
+    [(0, 0), (1, 1), (2, 2)],  
+    [(0, 2), (1, 1), (2, 0)]  
+]
+winning_states_O = [
+    # Horizontal Wins
+    [(0, 0), (0, 1), (0, 2)],  
+    [(1, 0), (1, 1), (1, 2)], 
+    [(2, 0), (2, 1), (2, 2)], 
+    # Vertical Wins
+    [(0, 0), (1, 0), (2, 0)],
+    [(0, 1), (1, 1), (2, 1)],  
+    [(0, 2), (1, 2), (2, 2)], 
+    # Diagonal Wins
+    [(0, 0), (1, 1), (2, 2)],  
+    [(0, 2), (1, 1), (2, 0)]   
+]
+
+
+
 
 
 while True:
@@ -131,6 +160,31 @@ while True:
     board = user_move_function(board)
     print(board)
 
+
+    def check_winner(board):
+        system_promt = f'You are expert tic tac toe refree whose job is to judge the board given provided by the user and return the result "X wins", "O wins", "Tie" or "continue". If X matches any of the following pattern  {winning_states_X} return X wins. If O matches any of the following pattern horizontally, vertically or diagonally {winning_states_O} return O wins. If there are still blank spaces return continue.'
+        user_prompt = f'Current Board State: {board}, Return the result or if the game in at most two words. In Tic Tac Toe, a game is tied when all cells in the grid are filled, and no player has achieved a winning state. Here are the patterns in which a Tic Tac Toe game can be tied, All cells are filled, and there are no winning states for either X or O. This implies that the game ends without a winner, resulting in a tie.'
+      
+
+       
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-0125",
+
+             messages = [
+                {
+                    "role": "system",
+                    "content": system_promt
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+         ]
+        )
+        
+        winner =  response.choices[0].message.content
+        print(winner)
+
     def ai_move_function(board):
         ai_move_prompt = f"""
                 You've been given the current state of the Tic Tac Toe board: {board}.
@@ -165,9 +219,31 @@ while True:
 
     board = ai_move_function(board)
     print(board)
-  
+    
 
+    def check_winner(board):
+        system_promt = f'You are expert tic tac toe refree whose job is to judge the board given provided by the user and return the result "X wins", "O wins", "Tie" or "continue". If X matches any of the following pattern  {winning_states_X} return X wins. If O matches any of the following pattern horizontally, vertically or diagonally {winning_states_O} return O wins. If there are still blank spaces return continue.'
+        user_prompt = f'Current Board State: {board}, Return the result or if the game in at most two words. In Tic Tac Toe, a game is tied when all cells in the grid are filled, and no player has achieved a winning state. Here are the patterns in which a Tic Tac Toe game can be tied, All cells are filled, and there are no winning states for either X or O. This implies that the game ends without a winner, resulting in a tie.'
+      
 
+       
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-0125",
+
+             messages = [
+                {
+                    "role": "system",
+                    "content": system_promt
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+         ]
+        )
+        
+        winner =  response.choices[0].message.content
+        print(winner)
  
        
 
