@@ -132,6 +132,18 @@ while True:
     print(board)
 
     def ai_move_function(board):
+        ai_move_prompt = f"""
+                You've been given the current state of the Tic Tac Toe board: {board}.
+                
+                Your task is to place the symbol 'O' on an empty position of the board.
+                
+                Ensure that you follow these guidelines:
+                - Check for empty positions on the board.
+                - Place the symbol 'O' on any available empty position.
+                - Return the updated board with the 'O' placed at the correct position.
+                
+                Please strictly return only the updated matrix representing the modified state of the Tic Tac Toe board.
+                """
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
 
@@ -142,15 +154,7 @@ while True:
             },
             {
                 "role":"user",
-                "content":f""" 
-
-            You will be given the matrix which is {board} and you have to place the symbol 'o' on the number in the matrix provided
-
-            You have to strictly return only the matrix after placing that symbol at the correct position which is empty
-
-            Make sure You are returning only the matrix in the given format
-
-        """  
+                "content":ai_move_prompt
             }
             ]
         )
