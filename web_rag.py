@@ -17,11 +17,11 @@ def extract_text(url):
         return None
     
 # url = 'https://web.njit.edu/~kimmelma/topicessay.html'
-print("Extracting ........")
+print("Text extraction from the website")
 webpage_text = extract_text(url)
-print("Creating Chunks......")
+print("Chunks")
 text_chunks = create_chunks(webpage_text)
-print("Creating Embeddings....")
+print("Embeddings")
 embeddings = []
 for chunk in text_chunks:
     embedding = get_embedding(chunk)
