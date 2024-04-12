@@ -49,7 +49,7 @@ def create_chunks(string, chunk_size = 1000, overlap = 200):
     return chunks
 
 
-def get_embedding(text, model="text-embedding-3-small"):
+def get_embedding(text, model="text-embedding-3-large"):
    text = text.replace("\n", " ")
    embedding_result = client.embeddings.create(input = text, model=model, encoding_format="float").data[0].embedding
    return embedding_result

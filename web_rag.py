@@ -15,8 +15,7 @@ def extract_text(url):
     else:
         print("Failed to retrieve the webpage.")
         return None
-    
-# url = 'https://web.njit.edu/~kimmelma/topicessay.html'
+
 print("Text extraction from the website")
 webpage_text = extract_text(url)
 print("Chunks")
