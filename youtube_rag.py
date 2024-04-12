@@ -10,22 +10,6 @@ from youtube import getting_yt_text
 
 text = getting_yt_text()
 
-# url = 'https://web.njit.edu/~kimmelma/topicessay.html'
-
-# def extract_text(url):  
-#     response = requests.get(url)
-
-#     if response.status_code == 200:
-#         soup = BeautifulSoup(response.content, 'html.parser')
-#         text = soup.get_text(separator='\n', strip=True)
-#         return text
-#     else:
-#         print("Failed to retrieve the webpage.")
-#         return None
-    
-# url = 'https://web.njit.edu/~kimmelma/topicessay.html'
-# print("Text extraction from the website")
-# webpage_text = extract_text(url)
 print("Chunks")
 text_chunks = create_chunks(text)
 print("Embeddings")
@@ -67,26 +51,6 @@ while True:
 
     print(response)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def extract_text(url):  
     response = requests.get(url)
 
@@ -98,7 +62,6 @@ def extract_text(url):
         print("Failed to retrieve the webpage.")
         return None
     
-# url = 'https://web.njit.edu/~kimmelma/topicessay.html'
 print("Text extraction from the website")
 webpage_text = extract_text(url)
 print("Chunks")
