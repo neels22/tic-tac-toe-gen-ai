@@ -17,43 +17,63 @@ from langchain.chains import create_sql_query_chain
 ############ auto execute the query 
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 
-
-groq_api_key = os.getenv("groq_api_key")
-llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
-
 openai_api_key = os.getenv("openai_api_key")
+groq_api_key = os.getenv("groq_api_key")
+
+
+llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
 # llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-db_user = "root"
-db_password = "root"
-db_host = "localhost"
-db_name = "sample"
-port = '3306'
+def connect_to_database():
+    """
+    Connect to the database using environment variables.
+    """
+    load_dotenv()
+    db_user = "root"
+    db_password = "root"
+    db_host = "localhost"
+    db_name = "sample"
+    port = '3306'
+    return SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{port}/{db_name}")
 
-db = SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{port}/{db_name}")
-
-print('#'*100)
-execute_query = QuerySQLDataBaseTool(db=db)
-write_query = create_sql_query_chain(llm, db)
-
-##################### creating a final answer chain 
-
-answer_prompt = PromptTemplate.from_template(
+def prompt_temp():
+    answer_prompt = PromptTemplate.from_template(
     """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
 
-Question: {question}
-SQL Query: {query}
-SQL Result: {result}
-Answer: """
-)
+        Question: {question}
+        SQL Query: {query}
+        SQL Result: {result}
+        Answer: """
+        )
+    return answer_prompt
 
-answer = answer_prompt | llm | StrOutputParser() #first chain
-chain = (
-    RunnablePassthrough.assign(query=write_query).assign(
-        result=itemgetter("query") | execute_query
-    )
-    | answer
-) #second chain
 
-user_inp = input("enter the question: ")
-print(chain.invoke({"question": user_inp}))
+
+
+def main():
+    """
+    Main function to execute the program.
+    """
+    db= connect_to_database()
+    execute_query = QuerySQLDataBaseTool(db=db)
+    write_query = create_sql_query_chain(llm, db)
+    answer_prompt = prompt_temp()
+
+
+    answer = answer_prompt | llm | StrOutputParser() #first chain
+
+
+    chain = (
+        RunnablePassthrough.assign(query=write_query).assign(
+            result=itemgetter("query") | execute_query
+        )
+        | answer
+    ) #second chain
+
+    user_input = input("enter the question: ")
+    print(chain.invoke({"question": user_input}))
+
+
+
+if __name__ == "__main__":
+    main()
