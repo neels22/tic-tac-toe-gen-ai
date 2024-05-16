@@ -70,8 +70,12 @@ def main():
         | answer
     ) #second chain
 
-    user_input = input("enter the question: ")
-    print(chain.invoke({"question": user_input}))
+
+    while True:
+        user_inp = input("enter the question: ")
+        if user_inp == "exit":
+            break
+        print(chain.invoke({"question": user_inp}))
 
 
 
