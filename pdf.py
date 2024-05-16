@@ -1,35 +1,46 @@
-
+import os
+import getpass
+from utils import llm, embeddings, loading_youtube, loading_website, loading_pdf, splitting_storing, prompting, similarities_top_k, llm_model_with_tool, output_parser
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
-import getpass
-import os
-from utils import llm,embeddings,loading_youtube,loading_website,loading_pdf,splitting_storing,prompting,similarities_top_k,llm_model_with_tool,output_parser
+
+def load_text_from_pdf(pdf_path):
+  
+    text = loading_pdf(pdf_path)
+    return text
+
+def get_prompt_embedding(human_prompt):
+ 
+    return embeddings.embed_query(human_prompt)
+
+def find_top_k_similar_documents(vector, prompt_embedding):
+
+    return vector.similarity_search_by_vector(embedding=prompt_embedding, k=similarities_top_k)
+
+def generate_response(prompt, llm_model_with_tool, output_parser, documents, input_text):
+
+    chain = prompt | llm_model_with_tool | output_parser
+    return chain.invoke({"documents": documents, "input": input_text})
 
 
-llm=llm
-embeddings=embeddings
-
-pdf_path = input("enter the pdf path: ")
-
-text = loading_pdf(pdf_path)
-vector = splitting_storing(text)
-prompt = prompting()
 
 
-human_prompt = input("enter your query: ")
-prompt_embedding = embeddings.embed_query(human_prompt)
 
-top_k_similar_documents = vector.similarity_search_by_vector(
-                    embedding=prompt_embedding,
-                    k=similarities_top_k
-                )
+def main():
+ 
+    pdf_path = input("Enter the PDF path: ")
+    text = load_text_from_pdf(pdf_path)
+    vector = splitting_storing(text)
 
-chain = prompt | llm_model_with_tool | output_parser
+    human_prompt = input("Enter your query: ")
+    prompt_embedding = get_prompt_embedding(human_prompt)
 
-response = chain.invoke({
-                    "documents": top_k_similar_documents,
-                    "input": human_prompt
-                })
+    top_k_similar_documents = find_top_k_similar_documents(vector, prompt_embedding)
 
-print("answer: ", response["answer"])
-print("sources: ", response["citations"])
+    response = generate_response(prompting(), llm_model_with_tool, output_parser, top_k_similar_documents, human_prompt)
+
+    print("Answer:", response["answer"])
+    print("Sources:", response["citations"])
+
+if __name__ == "__main__":
+    main()
