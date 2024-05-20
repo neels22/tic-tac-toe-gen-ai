@@ -28,25 +28,32 @@ def connect_to_database():
     """
     Connect to the database using environment variables.
     """
-    load_dotenv()
-    db_user = "root"
-    db_password = "root"
-    db_host = "localhost"
-    db_name = "sample"
-    port = '3306'
-    return SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{port}/{db_name}")
+    try:
+        load_dotenv()
+        db_user = "root"
+        db_password = "root"
+        db_host = "localhost"
+        db_name = "sample"
+        port = '3306'
+        return SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{port}/{db_name}")
+    except Exception as e:
+        print(f"An error occurred while connecting to the database: {e}")
+        return None
 
 def prompt_temp():
-    answer_prompt = PromptTemplate.from_template(
-    """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
+    try:
+        answer_prompt = PromptTemplate.from_template(
+            """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
 
-        Question: {question}
-        SQL Query: {query}
-        SQL Result: {result}
-        Answer: """
+            Question: {question}
+            SQL Query: {query}
+            SQL Result: {result}
+            Answer: """
         )
-    return answer_prompt
-
+        return answer_prompt
+    except Exception as e:
+        print(f"An error occurred while creating the prompt template: {e}")
+        return None
 
 
 
