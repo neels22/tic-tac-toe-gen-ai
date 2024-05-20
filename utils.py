@@ -32,6 +32,7 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 embeddings = HuggingFaceInferenceAPIEmbeddings(api_key=inference_api_key,model_name='sentence-transformers/all-MiniLM-l6-v2')
 
 
+# define the structure of data using basemodel
 
 class Citation(BaseModel):
     source: str = Field(
@@ -41,7 +42,8 @@ class Citation(BaseModel):
         description="page_content in the document object.",
     )
 
-
+#data model definition 
+#citations is a list field containing objects of type Citation. It represents all the document objects referred to in order to answer the user's query.
 class CitedAnswer(BaseModel):
 
     answer: str = Field(
@@ -52,52 +54,71 @@ class CitedAnswer(BaseModel):
     )
 
 
+
 def loading_youtube(link):
-    loader = YoutubeLoader.from_youtube_url(
-    link, add_video_info=False
-    )
-    text = loader.load()  
-    return text
+    try:
+        loader = YoutubeLoader.from_youtube_url(link, add_video_info=False)
+        text = loader.load()
+        return text
+    except Exception as e:
+        print(f"An error occurred while loading from YouTube: {e}")
+        return None
 
 def loading_website(link):
-    loader = WebBaseLoader(link)
-    docs = loader.load()
-    return docs
+    try:
+        loader = WebBaseLoader(link)
+        docs = loader.load()
+        return docs
+    except Exception as e:
+        print(f"An error occurred while loading from website: {e}")
+        return None
 
 def loading_pdf(pdf):
-    loader = PyPDFLoader(pdf)
-    pages = loader.load_and_split()
-    return pages
+    try:
+        loader = PyPDFLoader(pdf)
+        pages = loader.load_and_split()
+        return pages
+    except Exception as e:
+        print(f"An error occurred while loading PDF: {e}")
+        return None
 
-def set_directory_loader( directory_path):    
-    loader = DirectoryLoader(
-                path=directory_path,
-                show_progress=True
-            )
-    docs = loader.load()
-    return docs
+def set_directory_loader(directory_path):
+    try:
+        loader = DirectoryLoader(path=directory_path, show_progress=True)
+        docs = loader.load()
+        return docs
+    except Exception as e:
+        print(f"An error occurred while loading from directory: {e}")
+        return None
             
 
 ########## splitting and storing the embeddings ###########
 
 def splitting_storing(text):    
-    text_splitter = RecursiveCharacterTextSplitter()
-    documents = text_splitter.split_documents(text)
-    vector = FAISS.from_documents(documents, embeddings)
-    return vector
-
+    try:
+        text_splitter = RecursiveCharacterTextSplitter()
+        documents = text_splitter.split_documents(text)
+        vector = FAISS.from_documents(documents, embeddings)
+        return vector
+    except Exception as e:
+        print(f"An error occurred while splitting and storing text: {e}")
+        return None
 
 def prompting():
-    prompt = ChatPromptTemplate.from_template("""Rules:
-    Answer queries only from the given Documents.
-    If any query is asked outside Documents say "I don't know".
+    try:
+        prompt = ChatPromptTemplate.from_template("""Rules:
+        Answer queries only from the given Documents.
+        If any query is asked outside Documents say "I don't know".
 
-    Documents:
-    {documents}
+        Documents:
+        {documents}
 
-    User Query:
-    {input}""")
-    return prompt
+        User Query:
+        {input}""")
+        return prompt
+    except Exception as e:
+        print(f"An error occurred while creating the prompt: {e}")
+        return None
 
 
 
