@@ -1,5 +1,4 @@
 
-############  uses langchain create sql query chain  #################
 
 import os
 from dotenv import load_dotenv
@@ -16,33 +15,78 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import create_sql_query_chain
 ############ auto execute the query 
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
+
+
+groq_api_key = os.getenv("groq_api_key")
+# llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
 
 openai_api_key = os.getenv("openai_api_key")
-groq_api_key = os.getenv("groq_api_key")
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 
-llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
-# llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+
 
 def connect_to_database():
-    """
-    Connect to the database using environment variables.
-    """
+    db_user = "root"
+    db_password = "root"
+    db_host = "localhost"
+    db_name = "sample"
+    port = '3306'
+
     try:
-        load_dotenv()
-        db_user = "root"
-        db_password = "root"
-        db_host = "localhost"
-        db_name = "sample"
-        port = '3306'
-        return SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{port}/{db_name}")
+        db = SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{port}/{db_name}")
+        return db
     except Exception as e:
         print(f"An error occurred while connecting to the database: {e}")
         return None
 
-def prompt_temp():
-    try:
-        answer_prompt = PromptTemplate.from_template(
+db = connect_to_database()
+# chain = create_sql_query_chain(llm, db)
+
+
+system = """You are a {dialect} expert. Given an input question, creat a syntactically correct {dialect} query to run.
+Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per {dialect}. You can order the results to return the most informative data in the database.
+Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in double quotes (") to denote them as delimited identifiers.
+Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+Pay attention to use date('now') function to get the current date, if the question involves "today".
+
+Only use the following tables:
+{table_info}
+
+Write an initial draft of the query. Then double check the {dialect} query for common mistakes, including:
+- Using NOT IN with NULL values
+- Using UNION when UNION ALL should have been used
+- Using BETWEEN for exclusive ranges
+- Data type mismatch in predicates
+- Properly quoting identifiers
+- Using the correct number of arguments for functions
+- Casting to the correct data type
+- Using the proper columns for joins
+
+Use format:
+
+First draft: <<FIRST_DRAFT_QUERY>>
+Final answer: <<FINAL_ANSWER_QUERY>>
+"""
+
+
+prompt = ChatPromptTemplate.from_messages(
+    [("system", system), ("human", "{input}")]
+).partial(dialect=db.dialect)
+
+
+def parse_final_answer(output: str) -> str:
+    return output.split("Final answer: ")[1]
+
+#used to construct a sql query from the question 
+write_chain = create_sql_query_chain(llm, db, prompt=prompt) | parse_final_answer
+#execute the generated query 
+execute_query = QuerySQLDataBaseTool(db=db)
+
+
+answer_prompt = PromptTemplate.from_template(
             """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
 
             Question: {question}
@@ -50,41 +94,20 @@ def prompt_temp():
             SQL Result: {result}
             Answer: """
         )
-        return answer_prompt
-    except Exception as e:
-        print(f"An error occurred while creating the prompt template: {e}")
-        return None
+
+#to get answer in english
+answer = answer_prompt | llm | StrOutputParser() 
+
+chain = (
+    RunnablePassthrough.assign(query=write_chain).assign(
+        result=itemgetter("query") | execute_query
+    )
+    | answer
+) 
 
 
-
-def main():
-    """
-    Main function to execute the program.
-    """
-    db= connect_to_database()
-    execute_query = QuerySQLDataBaseTool(db=db)
-    write_query = create_sql_query_chain(llm, db)
-    answer_prompt = prompt_temp()
-
-
-    answer = answer_prompt | llm | StrOutputParser() #first chain
-
-
-    chain = (
-        RunnablePassthrough.assign(query=write_query).assign(
-            result=itemgetter("query") | execute_query
-        )
-        | answer
-    ) #second chain
-
-
-    while True:
-        user_inp = input("enter the question: ")
-        if user_inp == "exit":
-            break
-        print(chain.invoke({"question": user_inp}))
-
-
-
-if __name__ == "__main__":
-    main()
+while True:
+    user_input = input("enter the query: ")
+    if user_input == "" or user_input=="exit":
+        break
+    print(chain.invoke({"question":user_input}))
