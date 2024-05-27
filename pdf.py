@@ -1,8 +1,7 @@
-import os
-import getpass
+
 from utils import llm, embeddings, loading_youtube, loading_website, loading_pdf, splitting_storing, prompting, similarities_top_k, llm_model_with_tool, output_parser
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+
+
 
 def load_text_from_pdf(pdf_path):
   
