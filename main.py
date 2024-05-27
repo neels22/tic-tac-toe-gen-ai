@@ -39,7 +39,7 @@ system = """   - You are an SQL  expert.
            
             ##INSTRUCTIONS##
             
-            1. Your response should be in table format only nothing else.
+            1. Your response should be in Proper format only nothing else.
             
             2. The column names should be in the same order as the SQL query.
             3. Strictly, the column names are human-readable but with the same meaning as SQL column have. 
