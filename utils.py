@@ -32,8 +32,6 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 embeddings = HuggingFaceInferenceAPIEmbeddings(api_key=inference_api_key,model_name='sentence-transformers/all-MiniLM-l6-v2')
 
 
-# define the structure of data using basemodel
-
 class Citation(BaseModel):
     source: str = Field(
         description="source in the metadata of the document object."
@@ -42,8 +40,6 @@ class Citation(BaseModel):
         description="page_content in the document object.",
     )
 
-#data model definition 
-#citations is a list field containing objects of type Citation. It represents all the document objects referred to in order to answer the user's query.
 class CitedAnswer(BaseModel):
 
     answer: str = Field(
@@ -91,8 +87,6 @@ def set_directory_loader(directory_path):
         print(f"An error occurred while loading from directory: {e}")
         return None
             
-
-########## splitting and storing the embeddings ###########
 
 def splitting_storing(text):    
     try:

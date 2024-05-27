@@ -23,10 +23,6 @@ def generate_response(prompt, llm_model_with_tool, output_parser, documents, inp
     return chain.invoke({"documents": documents, "input": input_text})
 
 
-
-
-
-
 def main():
 
     website_link = input("Enter the website link: ")
