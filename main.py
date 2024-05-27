@@ -76,14 +76,9 @@ prompt = ChatPromptTemplate.from_messages(
 def parse_final_answer(output: str) -> str:
     return output.split("Final answer: ")[1]
 
-#used to construct a sql query from the question 
+
 write_chain = create_sql_query_chain(llm, db, prompt=prompt) | parse_final_answer
 
-user_input1=input("enter input: ")
-print(write_chain.invoke({"question":user_input1}))
-
-print("##############")
-#execute the generated query 
 execute_query = QuerySQLDataBaseTool(db=db)
 
 
@@ -96,7 +91,7 @@ answer_prompt = PromptTemplate.from_template(
             Answer: """
         )
 
-#to get answer in english
+
 answer = answer_prompt | llm | StrOutputParser() 
 
 chain = (
