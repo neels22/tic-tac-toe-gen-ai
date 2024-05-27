@@ -1,7 +1,7 @@
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from langchain.output_parsers.openai_tools import JsonOutputKeyToolsParser
 from langchain_community.document_loaders import (
-    WebBaseLoader, TextLoader, PyPDFLoader, youtube, DirectoryLoader
+    WebBaseLoader, PyPDFLoader, DirectoryLoader
 )
 from langchain_community.document_loaders import YoutubeLoader
 from langchain.output_parsers.openai_tools import JsonOutputKeyToolsParser
@@ -10,9 +10,9 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_community.vectorstores import FAISS
-from langchain_core.prompts import PromptTemplate
+
 from langchain_groq import ChatGroq
-from langchain_openai import ChatOpenAI
+
 from dotenv import load_dotenv
 from typing import List
 import os
