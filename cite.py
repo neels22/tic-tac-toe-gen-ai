@@ -54,16 +54,18 @@ def main():
 
 
     vector = splitting_storing(text)
+    while True:
+        human_prompt = input("Enter your query: ")
+        if human_prompt =='exit' or human_prompt=='':
+            break
+        prompt_embedding = get_prompt_embedding(human_prompt)
 
-    human_prompt = input("Enter your query: ")
-    prompt_embedding = get_prompt_embedding(human_prompt)
+        top_k_similar_documents = find_top_k_similar_documents(vector, prompt_embedding)
 
-    top_k_similar_documents = find_top_k_similar_documents(vector, prompt_embedding)
+        response = generate_response(prompting(), llm_model_with_tool, output_parser, top_k_similar_documents, human_prompt)
 
-    response = generate_response(prompting(), llm_model_with_tool, output_parser, top_k_similar_documents, human_prompt)
-
-    print("Answer:", response["answer"])
-    print("Sources:", response["citations"])
+        print("Answer:", response["answer"])
+        print("Sources:", response["citations"])
 
 if __name__ == "__main__":
     main()
