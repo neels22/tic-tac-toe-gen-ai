@@ -4,28 +4,19 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from langchain_community.utilities import SQLDatabase
-from langchain_cohere import ChatCohere
-from langchain_cohere import CohereEmbeddings
 from langchain_groq import ChatGroq
 from operator import itemgetter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain_openai import ChatOpenAI
 from langchain.chains import create_sql_query_chain
-############ auto execute the query 
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 
 
 groq_api_key = os.getenv("groq_api_key")
-# llm = ChatGroq(temperature=0, model_name="llama3-8b-8192")
-
-openai_api_key = os.getenv("openai_api_key")
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-
-
+llm = ChatGroq(temperature=0, model_name="llama3-70b-8192")
 
 
 def connect_to_database():
@@ -43,7 +34,7 @@ def connect_to_database():
         return None
 
 db = connect_to_database()
-# chain = create_sql_query_chain(llm, db)
+
 
 
 system = """You are a {dialect} expert. Given an input question, creat a syntactically correct {dialect} query to run.
@@ -69,6 +60,11 @@ Use format:
 
 First draft: <<FIRST_DRAFT_QUERY>>
 Final answer: <<FINAL_ANSWER_QUERY>>
+
+ #Important# 
+        1. Your response should be only the SQL Query. 
+        2. In the response there should be no other words than the sql query.
+        3. Don't write '\' in response
 """
 
 
@@ -82,6 +78,11 @@ def parse_final_answer(output: str) -> str:
 
 #used to construct a sql query from the question 
 write_chain = create_sql_query_chain(llm, db, prompt=prompt) | parse_final_answer
+
+user_input1=input("enter input: ")
+print(write_chain.invoke({"question":user_input1}))
+
+print("##############")
 #execute the generated query 
 execute_query = QuerySQLDataBaseTool(db=db)
 
