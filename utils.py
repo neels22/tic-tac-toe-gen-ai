@@ -21,14 +21,10 @@ load_dotenv()
 
 
 inference_api_key = os.getenv('INFERENCE_API_KEY')
-openai_api_key = os.getenv("openai_api_key")
-
 groq_api_key = os.getenv('GROQ_API_KEY')
 similarities_top_k = 10
 
-# llm = ChatGroq(temperature=0.0, model_name="llama3-8b-8192")
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-# embeddings = CohereEmbeddings()
+llm = ChatGroq(temperature=0.0, model_name="llama3-70b-8192")
 embeddings = HuggingFaceInferenceAPIEmbeddings(api_key=inference_api_key,model_name='sentence-transformers/all-MiniLM-l6-v2')
 
 
